@@ -1,7 +1,7 @@
 -- Buffer-local keymaps for each table mode. Prior user mappings are saved on
 -- install and restored on exit, so we never permanently clobber the user's keys.
-local config = require('table-vim.config')
-local state = require('table-vim.state')
+local config = require('pipetable.config')
+local state = require('pipetable.state')
 
 local M = {}
 
@@ -22,7 +22,7 @@ local function set_map(buf, saved, lhs, rhs, desc)
     return
   end
   saved[lhs] = vim.fn.maparg(lhs, 'n', false, true)
-  vim.keymap.set('n', lhs, rhs, { buffer = buf, nowait = true, silent = true, desc = desc or 'table-vim' })
+  vim.keymap.set('n', lhs, rhs, { buffer = buf, nowait = true, silent = true, desc = desc or 'pipetable' })
 end
 
 ---@param buf integer
@@ -63,7 +63,7 @@ local function op_maps(buf)
   if keys.ops == false or not keys.leader then
     return {}
   end
-  local ops = require('table-vim.ops')
+  local ops = require('pipetable.ops')
   local L = keys.leader
   local function s(suffix)
     return suffix and (L .. suffix) or nil
@@ -95,11 +95,11 @@ end
 ---@param buf integer
 function M.install_navigate(buf)
   local nav = config.get().keys.nav
-  local navigate = require('table-vim.navigate')
-  local mode = require('table-vim.mode')
-  local edit = require('table-vim.edit')
-  local ops = require('table-vim.ops')
-  local selection = require('table-vim.selection')
+  local navigate = require('pipetable.navigate')
+  local mode = require('pipetable.mode')
+  local edit = require('pipetable.edit')
+  local ops = require('pipetable.ops')
+  local selection = require('pipetable.selection')
 
   local maps = {
     { nav.left, function() navigate.move_col(buf, -1) end },
@@ -146,9 +146,9 @@ end
 ---@param buf integer
 function M.install_visual(buf)
   local v = config.get().keys.visual
-  local navigate = require('table-vim.navigate')
-  local selection = require('table-vim.selection')
-  local ops = require('table-vim.ops')
+  local navigate = require('pipetable.navigate')
+  local selection = require('pipetable.selection')
+  local ops = require('pipetable.ops')
 
   M.install(buf, 'table-visual', {
     { v.left, function() navigate.move_col(buf, -1) end },

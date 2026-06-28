@@ -1,4 +1,4 @@
-# table-vim sample
+# pipetable sample
 
 A wide table to exercise fit-to-width, truncation, and horizontal scroll.
 

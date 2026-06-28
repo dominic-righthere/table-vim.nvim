@@ -1,29 +1,29 @@
-*table-vim.txt*        Interactive, fit-to-width inline markdown tables
+*pipetable.txt*        Interactive, fit-to-width inline markdown tables
 
 Author:  Dominic Lee <https://github.com/dominic-righthere>
 License: MIT
 
 ==============================================================================
-CONTENTS                                                    *table-vim-contents*
+CONTENTS                                                    *pipetable-contents*
 
-  1. Introduction ............................ |table-vim-introduction|
-  2. Requirements ............................ |table-vim-requirements|
-  3. Setup ................................... |table-vim-setup|
-  4. Modes ................................... |table-vim-modes|
-  5. Keymaps ................................. |table-vim-keymaps|
-  6. Row & column operations ................. |table-vim-operations|
-  7. Selection ............................... |table-vim-selection|
-  8. Configuration ........................... |table-vim-config|
-  9. Highlights .............................. |table-vim-highlights|
- 10. Commands & <Plug> ....................... |table-vim-commands|
- 11. Conflicts & rebinding ................... |table-vim-conflicts|
- 12. render-markdown.nvim .................... |table-vim-render-markdown|
- 13. API ..................................... |table-vim-api|
+  1. Introduction ............................ |pipetable-introduction|
+  2. Requirements ............................ |pipetable-requirements|
+  3. Setup ................................... |pipetable-setup|
+  4. Modes ................................... |pipetable-modes|
+  5. Keymaps ................................. |pipetable-keymaps|
+  6. Row & column operations ................. |pipetable-operations|
+  7. Selection ............................... |pipetable-selection|
+  8. Configuration ........................... |pipetable-config|
+  9. Highlights .............................. |pipetable-highlights|
+ 10. Commands & <Plug> ....................... |pipetable-commands|
+ 11. Conflicts & rebinding ................... |pipetable-conflicts|
+ 12. render-markdown.nvim .................... |pipetable-render-markdown|
+ 13. API ..................................... |pipetable-api|
 
 ==============================================================================
-1. INTRODUCTION                                         *table-vim-introduction*
+1. INTRODUCTION                                         *pipetable-introduction*
 
-table-vim renders the markdown pipe-tables in a buffer to fit the window, then
+pipetable renders the markdown pipe-tables in a buffer to fit the window, then
 lets you move around them cell by cell, scroll sideways, and edit them like a
 small spreadsheet. The file on disk stays plain GitHub-flavored markdown the
 whole time: the raw `| ... |` text is the source of truth and the rendered view
@@ -42,47 +42,47 @@ Features:
   - CJK / double-width and escaped-pipe (`\|`) aware.
 
 ==============================================================================
-2. REQUIREMENTS                                         *table-vim-requirements*
+2. REQUIREMENTS                                         *pipetable-requirements*
 
   - Neovim 0.10 or newer (0.11 recommended).
   - No other dependencies. Table detection uses a regex scanner; the treesitter
-    `markdown` parser is only a fallback. See `:checkhealth table-vim`.
+    `markdown` parser is only a fallback. See `:checkhealth pipetable`.
 
 ==============================================================================
-3. SETUP                                                       *table-vim-setup*
+3. SETUP                                                       *pipetable-setup*
 
 Call setup() once. With lazy.nvim: >lua
 
     {
-      'dominic-righthere/table-vim.nvim',
+      'dominic-righthere/markdown-pipetable.nvim',
       ft = 'markdown',
       config = function()
-        require('table-vim').setup({})
+        require('pipetable').setup({})
       end,
     }
 <
-setup() accepts a table of options; see |table-vim-config| for the full list of
+setup() accepts a table of options; see |pipetable-config| for the full list of
 defaults.
 
 ==============================================================================
-4. MODES                                                       *table-vim-modes*
+4. MODES                                                       *pipetable-modes*
 
-While the cursor is in a table, table-vim is modal:
+While the cursor is in a table, pipetable is modal:
 
   table-navigate    Move between cells, scroll horizontally. Entered
                     automatically when the cursor lands on a table (see
-                    `auto_enter`), or via |:TableVim|.
+                    `auto_enter`), or via |:Pipetable|.
   in-cell           A small editor opens on the cell; its normal mode moves
                     within the cell text.
   in-cell-edit      The editor's insert mode; type to change the cell.
-  table-visual      Cell / row / column selection (see |table-vim-selection|).
+  table-visual      Cell / row / column selection (see |pipetable-selection|).
 
 The focused cell is shown reverse-video; the active row is tinted. A mode badge
-is shown right-aligned on the active row, and |table-vim.status()| is available
+is shown right-aligned on the active row, and |pipetable.status()| is available
 for statuslines.
 
 ==============================================================================
-5. KEYMAPS                                                   *table-vim-keymaps*
+5. KEYMAPS                                                   *pipetable-keymaps*
 
 In table-navigate (defaults, all configurable, buffer-local):
 
@@ -98,7 +98,7 @@ In table-navigate (defaults, all configurable, buffer-local):
 Pressing k/j off the top or bottom edge leaves the table in that direction.
 
 ==============================================================================
-6. ROW & COLUMN OPERATIONS                               *table-vim-operations*
+6. ROW & COLUMN OPERATIONS                               *pipetable-operations*
 
 Direct keys in table-navigate:
 
@@ -123,7 +123,7 @@ Every operation rewrites the table in a single edit, so |u| / |CTRL-R| undo and
 redo it atomically.
 
 ==============================================================================
-7. SELECTION                                               *table-vim-selection*
+7. SELECTION                                               *pipetable-selection*
 
 From table-navigate: `v` starts a cell-block selection, `V` selects whole rows,
 `<C-v>` selects whole columns. Extend with h/j/k/l (and gg/G/_/$); v/V/<C-v>
@@ -135,11 +135,11 @@ switch the kind. Then:
   <Esc>/q  cancel back to table-navigate
 
 ==============================================================================
-8. CONFIGURATION                                              *table-vim-config*
+8. CONFIGURATION                                              *pipetable-config*
 
 Defaults: >lua
 
-    require('table-vim').setup({
+    require('pipetable').setup({
       enabled = true,
       auto_enter = true,        -- enter table-navigate on a table
       filetypes = { 'markdown' },
@@ -159,14 +159,14 @@ Defaults: >lua
         leader = '<leader>t',   -- prefix for keys.ops
         nav = { ... }, ops = { ... }, visual = { ... },
       },
-      highlights = { ... },     -- see |table-vim-highlights|
+      highlights = { ... },     -- see |pipetable-highlights|
     })
 <
 Every key binding accepts a string, a list of strings, or `false` to disable.
 Setting `keys.ops = false` drops the whole leader group.
 
 ==============================================================================
-9. HIGHLIGHTS                                             *table-vim-highlights*
+9. HIGHLIGHTS                                             *pipetable-highlights*
 
 Each rendered piece is tagged with a fixed group; configure its look through
 `highlights`. A value is either a group to link to (a string) or an
@@ -174,16 +174,16 @@ Each rendered piece is tagged with a fixed group; configure its look through
 `false` leaves a group alone. Groups are re-applied on |:colorscheme|.
 
   Key            Group                  Default
-  border         TableVimBorder         Comment
-  header         TableVimHeader         Title
-  cell           TableVimCell           Normal
-  cursor_cell    TableVimCursorCell     { reverse = true, bold = true }
-  cursor_row     TableVimCursorRow      CursorLine
-  cursor_col     TableVimCursorColumn   CursorColumn
-  selection      TableVimSelection      Visual
-  overflow       TableVimOverflow       NonText
-  edit           TableVimEdit           IncSearch
-  hidden_cursor  TableVimHiddenCursor   { blend = 100 }
+  border         PipetableBorder         Comment
+  header         PipetableHeader         Title
+  cell           PipetableCell           Normal
+  cursor_cell    PipetableCursorCell     { reverse = true, bold = true }
+  cursor_row     PipetableCursorRow      CursorLine
+  cursor_col     PipetableCursorColumn   CursorColumn
+  selection      PipetableSelection      Visual
+  overflow       PipetableOverflow       NonText
+  edit           PipetableEdit           IncSearch
+  hidden_cursor  PipetableHiddenCursor   { blend = 100 }
 
 Example: >lua
 
@@ -194,10 +194,10 @@ Example: >lua
     }
 <
 ==============================================================================
-10. COMMANDS & <Plug>                                      *table-vim-commands*
+10. COMMANDS & <Plug>                                      *pipetable-commands*
 
-                                                                     *:TableVim*
-:TableVim            Toggle table mode on the current buffer.
+                                                                     *:Pipetable*
+:Pipetable            Toggle table mode on the current buffer.
 
 The operations are also commands (these work outside table mode too; they act
 on the table under the cursor):
@@ -213,10 +213,10 @@ on the table under the cursor):
   :TableYank
   :TablePaste[!]                (! = above/left)
 
-                                                                  *table-vim-plug*
+                                                                  *pipetable-plug*
 Every operation also has a <Plug> mapping, e.g.: >lua
 
-    vim.keymap.set('n', '<leader>ic', '<Plug>(table-vim-insert-col-right)')
+    vim.keymap.set('n', '<leader>ic', '<Plug>(pipetable-insert-col-right)')
 <
 Names: insert-row-below, insert-row-above, insert-col-right, insert-col-left,
 delete-row, delete-col, move-row-up, move-row-down, move-col-left,
@@ -224,7 +224,7 @@ move-col-right, dup-row, dup-col, align-left, align-center, align-right,
 align-default, sort-asc, sort-desc, yank-row, paste-below, paste-above.
 
 ==============================================================================
-11. CONFLICTS & REBINDING                                  *table-vim-conflicts*
+11. CONFLICTS & REBINDING                                  *pipetable-conflicts*
 
 Every navigate / visual / operation key is buffer-local and installed only
 while the cursor is in a table; your prior mappings are saved and restored on
@@ -235,14 +235,14 @@ actually in a table.
 To change or drop the defaults:
   - `keys.leader = '<localleader>t'` moves the whole operation group.
   - `keys.ops = false` drops the leader group; any binding `= false` is skipped.
-  - Or use the <Plug> maps / |:TableVim| commands and bind your own keys.
+  - Or use the <Plug> maps / |:Pipetable| commands and bind your own keys.
 
 ==============================================================================
-12. render-markdown.nvim                              *table-vim-render-markdown*
+12. render-markdown.nvim                              *pipetable-render-markdown*
 
 If you also use render-markdown.nvim, both render markdown tables by default and
 will draw over each other. Let render-markdown handle headings/code/lists and
-table-vim own tables: >lua
+pipetable own tables: >lua
 
     require('render-markdown').setup({
       pipe_table = { enabled = false },
@@ -250,21 +250,21 @@ table-vim own tables: >lua
     })
 <
 ==============================================================================
-13. API                                                         *table-vim-api*
+13. API                                                         *pipetable-api*
 
-table-vim.setup({opts})                                    *table-vim.setup()*
+pipetable.setup({opts})                                    *pipetable.setup()*
         Configure and enable the plugin.
 
-table-vim.toggle()                                        *table-vim.toggle()*
-        Toggle table mode on the current buffer (same as |:TableVim|).
+pipetable.toggle()                                        *pipetable.toggle()*
+        Toggle table mode on the current buffer (same as |:Pipetable|).
 
-table-vim.status()                                        *table-vim.status()*
+pipetable.status()                                        *pipetable.status()*
         Returns a statusline string like `TBL NAV 2:3`, or "" when not in a
         table. Example: >lua
 
-            vim.o.statusline = "%{%v:lua.require'table-vim'.status()%}"
+            vim.o.statusline = "%{%v:lua.require'pipetable'.status()%}"
 <
-table-vim.mode()                                            *table-vim.mode()*
+pipetable.mode()                                            *pipetable.mode()*
         Returns the current table mode ('inactive' when not in a table).
 
  vim:tw=78:ts=8:et:ft=help:norl:

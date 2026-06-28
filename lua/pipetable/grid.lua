@@ -2,7 +2,7 @@
 -- a mutation runs here, then format.build_lines/write turns it back into aligned
 -- markdown lines in a single buffer write. Cell text is FILE form (may contain \|).
 -- Row 1 is always the header.
-local width = require('table-vim.width')
+local width = require('pipetable.width')
 
 local M = {}
 

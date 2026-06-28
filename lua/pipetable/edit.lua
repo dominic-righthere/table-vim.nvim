@@ -3,10 +3,10 @@
 --   float normal mode  = in-cell      (move within the cell with vim motions)
 --   float insert mode  = in-cell-edit (type to change the cell)
 -- Commit writes the value back into the raw markdown via nvim_buf_set_text.
-local state = require('table-vim.state')
-local config = require('table-vim.config')
-local layout = require('table-vim.layout')
-local width = require('table-vim.width')
+local state = require('pipetable.state')
+local config = require('pipetable.config')
+local layout = require('pipetable.layout')
+local width = require('pipetable.width')
 
 local M = {}
 
@@ -31,7 +31,7 @@ end
 
 local function hide_cursor(st)
   if config.get().cursor.hide_real then
-    vim.o.guicursor = 'a:TableVimHiddenCursor'
+    vim.o.guicursor = 'a:PipetableHiddenCursor'
   end
 end
 
@@ -42,12 +42,12 @@ function M.open(buf, start_insert)
   if not st.active then
     return
   end
-  local manager = require('table-vim.manager')
+  local manager = require('pipetable.manager')
   local tbl = st.tables[st.active.ti]
   local row = tbl and tbl.rows[st.active.row]
   local cell = row and row.cells[st.active.col]
   if not cell or not cell.sbyte then
-    vim.notify('table-vim: this cell cannot be edited', vim.log.levels.WARN)
+    vim.notify('pipetable: this cell cannot be edited', vim.log.levels.WARN)
     return
   end
   local win = manager.win_for(buf)
@@ -87,7 +87,7 @@ function M.open(buf, start_insert)
   })
   st.edit.ewin = ewin
   -- use the fixed group name (highlights.edit holds an appearance spec, not a name)
-  vim.wo[ewin].winhighlight = 'Normal:' .. require('table-vim.config').GROUPS.edit
+  vim.wo[ewin].winhighlight = 'Normal:' .. require('pipetable.config').GROUPS.edit
   vim.wo[ewin].wrap = false
   show_cursor(st)
 
@@ -133,7 +133,7 @@ local function back_to_navigate(buf, st)
   vim.cmd('stopinsert')
   st.mode = 'table-navigate'
   hide_cursor(st)
-  local manager = require('table-vim.manager')
+  local manager = require('pipetable.manager')
   local win = manager.win_for(buf)
   if win and vim.api.nvim_win_is_valid(win) then
     vim.api.nvim_set_current_win(win)
@@ -155,7 +155,7 @@ function M.commit(buf, move_next)
     vim.api.nvim_win_close(e.ewin, true)
   end
 
-  local manager = require('table-vim.manager')
+  local manager = require('pipetable.manager')
   local tbl = st.tables[st.active.ti]
   local row = tbl and tbl.rows[e.row]
   local cell = row and row.cells[e.col]
@@ -175,7 +175,7 @@ function M.commit(buf, move_next)
   if config.get().format_on_edit then
     local ftbl = st.tables[st.active.ti]
     if ftbl then
-      require('table-vim.format').reformat(buf, ftbl)
+      require('pipetable.format').reformat(buf, ftbl)
       st.dirty = true
       manager.ensure_tables(buf)
     end
@@ -186,7 +186,7 @@ function M.commit(buf, move_next)
     local win = manager.win_for(buf)
     if newtbl and st.active.col < newtbl.ncols and win then
       st.active.col = st.active.col + 1
-      require('table-vim.navigate').ensure_visible(buf, newtbl, manager.usable_width(win))
+      require('pipetable.navigate').ensure_visible(buf, newtbl, manager.usable_width(win))
     else
       move_next = false
     end
@@ -210,7 +210,7 @@ function M.cancel(buf)
     vim.api.nvim_win_close(e.ewin, true)
   end
   back_to_navigate(buf, st)
-  require('table-vim.manager').refresh(buf)
+  require('pipetable.manager').refresh(buf)
 end
 
 return M

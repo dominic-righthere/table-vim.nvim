@@ -1,4 +1,4 @@
--- table-vim configuration: defaults, user-merge, and highlight groups.
+-- pipetable configuration: defaults, user-merge, and highlight groups.
 local M = {}
 
 ---@type table
@@ -44,7 +44,7 @@ M.defaults = {
   -- All keys are rebindable; set a key (or a whole group) to false to disable.
   -- Every binding accepts a string, a list of strings, or false.
   keys = {
-    enter = false, -- optional manual-enter key in normal mode (false = rely on auto_enter / :TableVim)
+    enter = false, -- optional manual-enter key in normal mode (false = rely on auto_enter / :Pipetable)
     leader = '<leader>t', -- prefix for the structural-op group (keys.ops are suffixes of this)
     nav = {
       left = 'h', down = 'j', up = 'k', right = 'l',
@@ -112,16 +112,16 @@ M.defaults = {
 -- Logical key -> the fixed highlight group used in extmarks. `highlights` above
 -- configures the *appearance* of these groups.
 M.GROUPS = {
-  border = 'TableVimBorder',
-  header = 'TableVimHeader',
-  cell = 'TableVimCell',
-  cursor_cell = 'TableVimCursorCell',
-  cursor_row = 'TableVimCursorRow',
-  cursor_col = 'TableVimCursorColumn',
-  selection = 'TableVimSelection',
-  overflow = 'TableVimOverflow',
-  edit = 'TableVimEdit',
-  hidden_cursor = 'TableVimHiddenCursor',
+  border = 'PipetableBorder',
+  header = 'PipetableHeader',
+  cell = 'PipetableCell',
+  cursor_cell = 'PipetableCursorCell',
+  cursor_row = 'PipetableCursorRow',
+  cursor_col = 'PipetableCursorColumn',
+  selection = 'PipetableSelection',
+  overflow = 'PipetableOverflow',
+  edit = 'PipetableEdit',
+  hidden_cursor = 'PipetableHiddenCursor',
 }
 
 M.options = vim.deepcopy(M.defaults)
@@ -168,7 +168,7 @@ function M.setup_highlights()
   apply_highlights()
   -- :colorscheme clears all groups; re-apply ours. Recreate (clear) the group so
   -- repeated setup() calls don't stack duplicate autocmds.
-  local aug = vim.api.nvim_create_augroup('table-vim-hl', { clear = true })
+  local aug = vim.api.nvim_create_augroup('pipetable-hl', { clear = true })
   vim.api.nvim_create_autocmd('ColorScheme', {
     group = aug,
     callback = apply_highlights,

@@ -1,6 +1,6 @@
 -- Turn a grid (see grid.lua) into aligned, portable GFM lines, and write them
 -- back to the buffer. Used by structural ops and by `format_on_edit` reformatting.
-local width = require('table-vim.width')
+local width = require('pipetable.width')
 
 local M = {}
 
@@ -71,7 +71,7 @@ end
 ---@param buf integer
 ---@param tbl table
 function M.reformat(buf, tbl)
-  M.write(buf, tbl.range, require('table-vim.grid').from_table(tbl))
+  M.write(buf, tbl.range, require('pipetable.grid').from_table(tbl))
 end
 
 return M

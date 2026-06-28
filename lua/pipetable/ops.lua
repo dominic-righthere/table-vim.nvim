@@ -1,12 +1,12 @@
 -- Structural table operations: mutate the grid, rewrite the table's lines in one
 -- buffer write (single undo step), reparse, and reposition the active cell.
-local grid = require('table-vim.grid')
-local config = require('table-vim.config')
+local grid = require('pipetable.grid')
+local config = require('pipetable.config')
 
 local M = {}
 
 local function notify(msg)
-  vim.notify('table-vim: ' .. msg, vim.log.levels.WARN)
+  vim.notify('pipetable: ' .. msg, vim.log.levels.WARN)
 end
 
 ---Resolve the table to operate on. Uses the active cell when in table mode,
@@ -14,8 +14,8 @@ end
 ---@param buf integer
 ---@return table|nil st, table|nil tbl
 local function resolve(buf)
-  local state = require('table-vim.state')
-  local manager = require('table-vim.manager')
+  local state = require('pipetable.state')
+  local manager = require('pipetable.manager')
   local st = state.get(buf)
   manager.ensure_tables(buf)
   if st.active and st.tables and st.tables[st.active.ti] then
@@ -26,13 +26,13 @@ local function resolve(buf)
     return nil
   end
   local lnum = vim.api.nvim_win_get_cursor(win)[1] - 1
-  local tbl, ti = require('table-vim.parser').table_at(st.tables or {}, lnum)
+  local tbl, ti = require('pipetable.parser').table_at(st.tables or {}, lnum)
   if not tbl then
     return nil
   end
   st.active = st.active or {}
   st.active.ti = ti
-  st.active.row = require('table-vim.navigate').row_index_for_lnum(tbl, lnum)
+  st.active.row = require('pipetable.navigate').row_index_for_lnum(tbl, lnum)
   st.active.col = math.min(st.active.col or 1, tbl.ncols)
   return st, tbl
 end
@@ -44,11 +44,11 @@ end
 ---@param new_row integer|nil
 ---@param new_col integer|nil
 local function apply(buf, tbl, g, new_row, new_col)
-  local state = require('table-vim.state')
-  local manager = require('table-vim.manager')
-  local navigate = require('table-vim.navigate')
+  local state = require('pipetable.state')
+  local manager = require('pipetable.manager')
+  local navigate = require('pipetable.navigate')
 
-  require('table-vim.format').write(buf, tbl.range, g)
+  require('pipetable.format').write(buf, tbl.range, g)
 
   local st = state.get(buf)
   st.dirty = true
@@ -176,7 +176,7 @@ end
 ---Delete the current selection: rows→drop rows, cols→drop columns, cells→clear.
 ---@param buf integer
 function M.delete_selection(buf)
-  local selection = require('table-vim.selection')
+  local selection = require('pipetable.selection')
   local st, tbl = resolve(buf)
   if not st then return end
   local rng = selection.range(st, tbl)
@@ -194,7 +194,7 @@ function M.delete_selection(buf)
       return notify('cannot delete the last column')
     end
     selection.clear(buf)
-    require('table-vim.mode').set_mode(buf, 'table-navigate')
+    require('pipetable.mode').set_mode(buf, 'table-navigate')
     apply(buf, tbl, g, st.active.row, math.min(rng.c1, g.ncols))
   elseif rng.kind == 'row' then
     local from = math.max(2, rng.r1)
@@ -202,12 +202,12 @@ function M.delete_selection(buf)
       return notify('cannot delete those rows (header / last body protected)')
     end
     selection.clear(buf)
-    require('table-vim.mode').set_mode(buf, 'table-navigate')
+    require('pipetable.mode').set_mode(buf, 'table-navigate')
     apply(buf, tbl, g, math.min(from, g.nrows), st.active.col)
   else
     grid.clear(g, rng.r1, rng.c1, rng.r2, rng.c2)
     selection.clear(buf)
-    require('table-vim.mode').set_mode(buf, 'table-navigate')
+    require('pipetable.mode').set_mode(buf, 'table-navigate')
     apply(buf, tbl, g, st.active.row, st.active.col)
   end
 end
@@ -215,7 +215,7 @@ end
 ---Clear the contents of the selected cells (keeps structure).
 ---@param buf integer
 function M.clear_selection(buf)
-  local selection = require('table-vim.selection')
+  local selection = require('pipetable.selection')
   local st, tbl = resolve(buf)
   if not st then return end
   local rng = selection.range(st, tbl)
@@ -223,7 +223,7 @@ function M.clear_selection(buf)
   local g = grid.from_table(tbl)
   grid.clear(g, rng.r1, rng.c1, rng.r2, rng.c2)
   selection.clear(buf)
-  require('table-vim.mode').set_mode(buf, 'table-navigate')
+  require('pipetable.mode').set_mode(buf, 'table-navigate')
   apply(buf, tbl, g, st.active.row, st.active.col)
 end
 
@@ -232,7 +232,7 @@ end
 M.register = nil
 
 local function to_tsv(cells)
-  local width = require('table-vim.width')
+  local width = require('pipetable.width')
   local rows = {}
   for _, r in ipairs(cells) do
     local cols = {}
@@ -261,13 +261,13 @@ function M.yank_row(buf)
   local sub = grid.slice(g, st.active.row, 1, st.active.row, g.ncols)
   M.register = { kind = 'row', cells = sub.cells }
   set_clipboard(sub.cells)
-  vim.notify('table-vim: yanked row', vim.log.levels.INFO)
+  vim.notify('pipetable: yanked row', vim.log.levels.INFO)
 end
 
 ---Yank the current selection (kind = selection kind).
 ---@param buf integer
 function M.yank_selection(buf)
-  local selection = require('table-vim.selection')
+  local selection = require('pipetable.selection')
   local st, tbl = resolve(buf)
   if not st then return end
   local rng = selection.range(st, tbl)
@@ -276,9 +276,9 @@ function M.yank_selection(buf)
   M.register = { kind = rng.kind, cells = sub.cells }
   set_clipboard(sub.cells)
   selection.clear(buf)
-  require('table-vim.mode').set_mode(buf, 'table-navigate')
-  require('table-vim.manager').refresh(buf)
-  vim.notify(string.format('table-vim: yanked %s', rng.kind), vim.log.levels.INFO)
+  require('pipetable.mode').set_mode(buf, 'table-navigate')
+  require('pipetable.manager').refresh(buf)
+  vim.notify(string.format('pipetable: yanked %s', rng.kind), vim.log.levels.INFO)
 end
 
 ---Paste the register. Row→insert rows, col→insert cols, cell→overwrite block.

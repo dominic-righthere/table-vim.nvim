@@ -1,12 +1,12 @@
-# table-vim
+# pipetable
 
-[![CI](https://github.com/dominic-righthere/table-vim.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/dominic-righthere/table-vim.nvim/actions/workflows/ci.yml)
+[![CI](https://github.com/dominic-righthere/markdown-pipetable.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/dominic-righthere/markdown-pipetable.nvim/actions/workflows/ci.yml)
 
 Interactive, fit-to-width markdown tables for Neovim, rendered inline in your buffer.
 
-![table-vim demo](assets/demo.svg)
+![pipetable demo](assets/demo.svg)
 
-table-vim takes the pipe tables in a markdown buffer and renders them to fit the
+pipetable takes the pipe tables in a markdown buffer and renders them to fit the
 window, then lets you move around them cell by cell, scroll sideways, and edit
 them like a small spreadsheet. The file on disk stays plain GitHub-flavored
 markdown the whole time.
@@ -28,7 +28,7 @@ other renderer) and isn't part of one.
 - Moving past the visible edge scrolls the table and keeps the focused cell in
   view. `‹` and `›` appear when there are more columns off-screen.
 - It enters table mode on its own when the cursor lands on a table and leaves
-  when the cursor moves away. `:TableVim` toggles it by hand.
+  when the cursor moves away. `:Pipetable` toggles it by hand.
 - Understands CJK / double-width characters and escaped pipes (`\|`).
 
 ## Requirements
@@ -36,7 +36,7 @@ other renderer) and isn't part of one.
 - Neovim 0.10 or newer (0.11 recommended).
 - Nothing else. Table detection uses a regex scanner that works out of the box;
   the treesitter `markdown` parser is only used as a fallback if it happens to be
-  installed. Run `:checkhealth table-vim` to see what's active.
+  installed. Run `:checkhealth pipetable` to see what's active.
 
 ## Install
 
@@ -44,15 +44,15 @@ With lazy.nvim:
 
 ```lua
 {
-  'dominic-righthere/table-vim.nvim',
+  'dominic-righthere/markdown-pipetable.nvim',
   ft = 'markdown',
   config = function()
-    require('table-vim').setup({})
+    require('pipetable').setup({})
   end,
 }
 ```
 
-For local development, swap the repo string for `dir = '~/path/to/table-vim'`.
+For local development, swap the repo string for `dir = '~/path/to/pipetable'`.
 
 ## Keymaps (while in a table)
 
@@ -117,7 +117,7 @@ and `<C-v>` selects whole columns. Extend with `h` `j` `k` `l` (and `gg` `G` `_`
 `setup()` takes the following (defaults shown):
 
 ```lua
-require('table-vim').setup({
+require('pipetable').setup({
   enabled = true,
   auto_enter = true,                 -- enter table-navigate when the cursor lands on a table
   filetypes = { 'markdown' },
@@ -176,16 +176,16 @@ reapplied on `:colorscheme`.
 
 | Logical key | Group | Default | Role |
 |-------------|-------|---------|------|
-| `border` | `TableVimBorder` | `Comment` | box/borders |
-| `header` | `TableVimHeader` | `Title` | header row text |
-| `cell` | `TableVimCell` | `Normal` | body cell text |
-| `cursor_cell` | `TableVimCursorCell` | `{ reverse = true, bold = true }` | the focused cell |
-| `cursor_row` | `TableVimCursorRow` | `CursorLine` | active-row tint (`cursor.row_highlight`) |
-| `cursor_col` | `TableVimCursorColumn` | `CursorColumn` | active-column tint (`cursor.column_highlight`) |
-| `selection` | `TableVimSelection` | `Visual` | visual selection |
-| `overflow` | `TableVimOverflow` | `NonText` | `‹` / `›` / `…` indicators |
-| `edit` | `TableVimEdit` | `IncSearch` | cell editor and mode badge |
-| `hidden_cursor` | `TableVimHiddenCursor` | `{ blend = 100 }` | the hidden real cursor |
+| `border` | `PipetableBorder` | `Comment` | box/borders |
+| `header` | `PipetableHeader` | `Title` | header row text |
+| `cell` | `PipetableCell` | `Normal` | body cell text |
+| `cursor_cell` | `PipetableCursorCell` | `{ reverse = true, bold = true }` | the focused cell |
+| `cursor_row` | `PipetableCursorRow` | `CursorLine` | active-row tint (`cursor.row_highlight`) |
+| `cursor_col` | `PipetableCursorColumn` | `CursorColumn` | active-column tint (`cursor.column_highlight`) |
+| `selection` | `PipetableSelection` | `Visual` | visual selection |
+| `overflow` | `PipetableOverflow` | `NonText` | `‹` / `›` / `…` indicators |
+| `edit` | `PipetableEdit` | `IncSearch` | cell editor and mode badge |
+| `hidden_cursor` | `PipetableHiddenCursor` | `{ blend = 100 }` | the hidden real cursor |
 
 For example:
 
@@ -193,7 +193,7 @@ For example:
 highlights = {
   cursor_cell = { bg = '#7aa2f7', fg = '#1a1b26', bold = true }, -- explicit colors
   cursor_row  = 'Visual',                                        -- link to another group
-  border      = false,                                           -- leave TableVimBorder as-is
+  border      = false,                                           -- leave PipetableBorder as-is
 }
 ```
 
@@ -202,25 +202,25 @@ are. Set `cursor.column_highlight = true` if you want a full spreadsheet crossha
 
 ### Statusline
 
-`require('table-vim').status()` returns something like `TBL NAV 2:3`, or an empty
+`require('pipetable').status()` returns something like `TBL NAV 2:3`, or an empty
 string when you're not in a table. There's also a small mode badge shown
 right-aligned on the active row.
 
 ## Commands and `<Plug>` mappings
 
-- `:TableVim` toggles table mode on the current buffer.
-- `:checkhealth table-vim` runs an environment check.
+- `:Pipetable` toggles table mode on the current buffer.
+- `:checkhealth pipetable` runs an environment check.
 - The operations are commands too, and these also work outside table mode (they
   act on whichever table is under the cursor): `:TableInsertRow[!]` (`!` means
   above), `:TableDeleteRow`, `:TableInsertColumn[!]` (`!` means left),
   `:TableDeleteColumn`, `:TableMoveRow up|down`, `:TableMoveColumn left|right`,
   `:TableAlign left|center|right|default`, `:TableSort[!]` (`!` for descending),
   `:TableYank`, and `:TablePaste[!]` (`!` for above/left).
-- There's a `<Plug>(table-vim-...)` mapping for every operation, for example
+- There's a `<Plug>(pipetable-...)` mapping for every operation, for example
   `...-insert-col-right`, `...-delete-row`, `...-move-col-left`, `...-align-center`,
   `...-sort-asc`, `...-yank-row`, `...-paste-below`. Bind your own keys in any mode:
   ```lua
-  vim.keymap.set('n', '<leader>ic', '<Plug>(table-vim-insert-col-right)')
+  vim.keymap.set('n', '<leader>ic', '<Plug>(pipetable-insert-col-right)')
   ```
 
 ## Worried about key conflicts?
@@ -244,19 +244,19 @@ If you want to change or drop the defaults:
 Out of the box both plugins render markdown tables, so they'll draw on top of each
 other and you get doubled, garbled boxes. They also both touch the `conceallevel`
 and `concealcursor` window options. The fix is to let render-markdown handle
-headings, code, and lists, and let table-vim own tables. Turn off its table
+headings, code, and lists, and let pipetable own tables. Turn off its table
 rendering and stop it from fighting over `concealcursor`:
 
 ```lua
 require('render-markdown').setup({
   -- ...your existing opts...
-  pipe_table = { enabled = false },                        -- table-vim owns tables
-  win_options = { concealcursor = { rendered = 'nvic' } }, -- keep table-vim's active row rendered
+  pipe_table = { enabled = false },                        -- pipetable owns tables
+  win_options = { concealcursor = { rendered = 'nvic' } }, -- keep pipetable's active row rendered
 })
 ```
 
 After that, headings keep render-markdown's styling and tables become interactive
-through table-vim.
+through pipetable.
 
 ## Known limitations
 

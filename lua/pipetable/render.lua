@@ -1,12 +1,12 @@
 -- Turn a parsed Table + layout into extmarks: conceal the raw line, paint a
 -- fitted inline virtual line over it, and draw top/bottom box borders as
 -- virtual lines. (M1 persistent path; M3 moves this into a decoration provider.)
-local layout = require('table-vim.layout')
-local config = require('table-vim.config')
+local layout = require('pipetable.layout')
+local config = require('pipetable.config')
 
 local M = {}
 
-M.ns = vim.api.nvim_create_namespace('table-vim')
+M.ns = vim.api.nvim_create_namespace('pipetable')
 
 ---The fixed extmark highlight groups (appearance is set via config.highlights).
 ---@return table

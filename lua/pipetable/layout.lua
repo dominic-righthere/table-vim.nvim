@@ -1,7 +1,7 @@
 -- Pure viewport math: decide which columns are visible for a given width and
 -- horizontal offset, and build the per-line virtual-text chunk lists.
 -- No side effects, no extmarks here.
-local width = require('table-vim.width')
+local width = require('pipetable.width')
 
 local M = {}
 

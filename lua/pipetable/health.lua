@@ -1,9 +1,9 @@
--- :checkhealth table-vim
+-- :checkhealth pipetable
 local M = {}
 
 function M.check()
   local health = vim.health
-  health.start('table-vim')
+  health.start('pipetable')
 
   if vim.fn.has('nvim-0.10') == 1 then
     health.ok('Neovim ' .. tostring(vim.version()))
@@ -19,11 +19,11 @@ function M.check()
     health.info('treesitter `markdown` parser not found (only used as a fallback)')
   end
 
-  local ok = pcall(require, 'table-vim.config')
+  local ok = pcall(require, 'pipetable.config')
   if ok then
     health.ok('plugin modules load')
   else
-    health.error('failed to load table-vim modules')
+    health.error('failed to load pipetable modules')
   end
 end
 

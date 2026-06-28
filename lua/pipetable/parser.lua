@@ -2,8 +2,8 @@
 -- Detection prefers treesitter (`pipe_table` nodes) and falls back to a regex scan.
 -- Cell/pipe byte positions are always derived by scanning each line so the two
 -- detection paths produce an identical model.
-local config = require('table-vim.config')
-local width = require('table-vim.width')
+local config = require('pipetable.config')
+local width = require('pipetable.width')
 
 local M = {}
 

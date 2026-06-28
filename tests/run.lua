@@ -1,4 +1,4 @@
--- Headless test suite for table-vim.
+-- Headless test suite for pipetable.
 -- Run:  nvim --headless -u NONE -i NONE -l tests/run.lua
 -- Exits non-zero if any assertion fails (used by CI).
 
@@ -19,22 +19,22 @@ local function section(s)
   io.write('\n# ' .. s .. '\n')
 end
 
-local tv = require('table-vim')
+local tv = require('pipetable')
 tv.setup({})
 
-local config = require('table-vim.config')
-local width = require('table-vim.width')
-local parser = require('table-vim.parser')
-local grid = require('table-vim.grid')
-local format = require('table-vim.format')
-local layout = require('table-vim.layout')
-local selection = require('table-vim.selection')
-local state = require('table-vim.state')
-local mode = require('table-vim.mode')
-local manager = require('table-vim.manager')
-local ops = require('table-vim.ops')
-local edit = require('table-vim.edit')
-local render = require('table-vim.render')
+local config = require('pipetable.config')
+local width = require('pipetable.width')
+local parser = require('pipetable.parser')
+local grid = require('pipetable.grid')
+local format = require('pipetable.format')
+local layout = require('pipetable.layout')
+local selection = require('pipetable.selection')
+local state = require('pipetable.state')
+local mode = require('pipetable.mode')
+local manager = require('pipetable.manager')
+local ops = require('pipetable.ops')
+local edit = require('pipetable.edit')
+local render = require('pipetable.render')
 
 local function mkbuf(lines)
   local b = vim.api.nvim_create_buf(false, true)
@@ -235,15 +235,15 @@ section('highlights')
 do
   config.setup({})
   config.setup_highlights()
-  eq('cursor_cell reverse default', tostring(vim.api.nvim_get_hl(0, { name = 'TableVimCursorCell' }).reverse), 'true')
+  eq('cursor_cell reverse default', tostring(vim.api.nvim_get_hl(0, { name = 'PipetableCursorCell' }).reverse), 'true')
   config.setup({ highlights = { cursor_cell = { bg = '#ff0000' } } })
   config.setup_highlights()
-  local h = vim.api.nvim_get_hl(0, { name = 'TableVimCursorCell' })
+  local h = vim.api.nvim_get_hl(0, { name = 'PipetableCursorCell' })
   eq('custom bg applied', string.format('#%06x', h.bg or 0), '#ff0000')
   eq('reverse dropped (spec replaces)', tostring(h.reverse), 'nil')
   config.setup({ highlights = { border = 'WarningMsg' } })
   config.setup_highlights()
-  eq('link applied', vim.api.nvim_get_hl(0, { name = 'TableVimBorder' }).link, 'WarningMsg')
+  eq('link applied', vim.api.nvim_get_hl(0, { name = 'PipetableBorder' }).link, 'WarningMsg')
   config.setup({})
   config.setup_highlights()
 end

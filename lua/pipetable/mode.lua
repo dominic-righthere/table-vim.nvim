@@ -2,9 +2,9 @@
 -- shared "view" (non-modifiable buffer + hidden real cursor) that all table modes
 -- use. It does NOT repaint — callers (enter/exit/selection) trigger a refresh.
 -- (in-cell / in-cell-edit are driven by edit.lua's floating editor, not set_mode.)
-local state = require('table-vim.state')
-local config = require('table-vim.config')
-local keymaps = require('table-vim.keymaps')
+local state = require('pipetable.state')
+local config = require('pipetable.config')
+local keymaps = require('pipetable.keymaps')
 
 local M = {}
 
@@ -20,7 +20,7 @@ local function set_view(buf, st)
   vim.bo[buf].modifiable = false
   if config.get().cursor.hide_real then
     st.saved.guicursor = vim.o.guicursor
-    vim.o.guicursor = 'a:TableVimHiddenCursor'
+    vim.o.guicursor = 'a:PipetableHiddenCursor'
   end
 end
 
@@ -78,8 +78,8 @@ end
 ---@param lnum integer 0-based
 function M.enter(buf, tbl, ti, lnum)
   local st = state.get(buf)
-  local manager = require('table-vim.manager')
-  local navigate = require('table-vim.navigate')
+  local manager = require('pipetable.manager')
+  local navigate = require('pipetable.navigate')
 
   local row = navigate.row_index_for_lnum(tbl, lnum)
   local keep_col = (st.active and st.active.ti == ti) and st.active.col or 1
@@ -111,7 +111,7 @@ function M.exit(buf)
   M.set_mode(buf, 'inactive')
   st.active = nil
   st.selection = nil
-  require('table-vim.manager').refresh(buf)
+  require('pipetable.manager').refresh(buf)
 end
 
 return M

@@ -1,9 +1,9 @@
 -- Logical cell movement and horizontal scroll-follow.
 -- Movement updates state.active (+ scroll), parks the real cursor on the active
 -- row's buffer line, and asks the manager to repaint.
-local state = require('table-vim.state')
-local config = require('table-vim.config')
-local layout = require('table-vim.layout')
+local state = require('pipetable.state')
+local config = require('pipetable.config')
+local layout = require('pipetable.layout')
 
 local M = {}
 
@@ -28,7 +28,7 @@ end
 ---@param buf integer
 ---@return table st, integer|nil win, table|nil tbl, table manager
 local function ctx(buf)
-  local manager = require('table-vim.manager')
+  local manager = require('pipetable.manager')
   local st = state.get(buf)
   local win = manager.win_for(buf)
   local tbl = (st.active and st.tables) and st.tables[st.active.ti] or nil
@@ -89,7 +89,7 @@ function M.move_row(buf, delta, no_exit)
       return
     end
     -- Stepping off the top/bottom edge leaves the table in that direction.
-    require('table-vim.mode').exit(buf)
+    require('pipetable.mode').exit(buf)
     local target = vim.api.nvim_win_get_cursor(win)[1] + delta
     target = math.max(1, math.min(vim.api.nvim_buf_line_count(buf), target))
     vim.api.nvim_win_set_cursor(win, { target, 0 })
@@ -119,7 +119,7 @@ end
 ---@param redo boolean
 function M.undo(buf, redo)
   local st = state.get(buf)
-  local manager = require('table-vim.manager')
+  local manager = require('pipetable.manager')
   local was = vim.bo[buf].modifiable
   vim.bo[buf].modifiable = true
   pcall(vim.cmd, redo and 'redo' or 'undo')
@@ -132,7 +132,7 @@ function M.undo(buf, redo)
     return
   end
   local lnum = vim.api.nvim_win_get_cursor(win)[1] - 1
-  local tbl, ti = require('table-vim.parser').table_at(st.tables, lnum)
+  local tbl, ti = require('pipetable.parser').table_at(st.tables, lnum)
   if tbl and st.active then
     st.active.ti = ti
     st.active.row = M.row_index_for_lnum(tbl, lnum)
@@ -141,7 +141,7 @@ function M.undo(buf, redo)
     vim.api.nvim_win_set_cursor(win, { tbl.rows[st.active.row].lnum + 1, 0 })
     manager.refresh(buf)
   else
-    require('table-vim.mode').exit(buf)
+    require('pipetable.mode').exit(buf)
   end
 end
 

@@ -1,6 +1,6 @@
 -- Multi-cell selection state + table-visual entry. The selection head is always
 -- the current active cell; the anchor is fixed at start. range() normalizes them.
-local state = require('table-vim.state')
+local state = require('pipetable.state')
 
 local M = {}
 
@@ -14,9 +14,9 @@ function M.start(buf, kind)
   end
   st.selection = { kind = kind, anchor = { row = st.active.row, col = st.active.col } }
   if st.mode ~= 'table-visual' then
-    require('table-vim.mode').set_mode(buf, 'table-visual')
+    require('pipetable.mode').set_mode(buf, 'table-visual')
   end
-  require('table-vim.manager').refresh(buf)
+  require('pipetable.manager').refresh(buf)
 end
 
 ---Change the selection kind in place.
@@ -28,7 +28,7 @@ function M.switch(buf, kind)
     return M.start(buf, kind)
   end
   st.selection.kind = kind
-  require('table-vim.manager').refresh(buf)
+  require('pipetable.manager').refresh(buf)
 end
 
 ---Normalized selection rectangle for the current head (active) + anchor.
@@ -61,8 +61,8 @@ end
 function M.cancel(buf)
   local st = state.get(buf)
   st.selection = nil
-  require('table-vim.mode').set_mode(buf, 'table-navigate')
-  require('table-vim.manager').refresh(buf)
+  require('pipetable.mode').set_mode(buf, 'table-navigate')
+  require('pipetable.manager').refresh(buf)
 end
 
 return M

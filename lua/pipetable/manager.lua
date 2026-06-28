@@ -1,12 +1,12 @@
--- Autocmds, attach/detach, debounced repaint, auto enter/exit, and :TableVim.
-local config = require('table-vim.config')
-local parser = require('table-vim.parser')
-local render = require('table-vim.render')
-local state = require('table-vim.state')
+-- Autocmds, attach/detach, debounced repaint, auto enter/exit, and :Pipetable.
+local config = require('pipetable.config')
+local parser = require('pipetable.parser')
+local render = require('pipetable.render')
+local state = require('pipetable.state')
 
 local M = {}
 
-local augroup = vim.api.nvim_create_augroup('table-vim', { clear = true })
+local augroup = vim.api.nvim_create_augroup('pipetable', { clear = true })
 
 ---@param win integer
 ---@return integer
@@ -109,7 +109,7 @@ function M.refresh(buf)
   for ti, tbl in ipairs(tables) do
     if tbl.range[2] >= top and tbl.range[1] <= bot then
       if st.mode ~= 'inactive' and st.active and st.active.ti == ti then
-        local sel = (st.mode == 'table-visual') and require('table-vim.selection').range(st, tbl) or nil
+        local sel = (st.mode == 'table-visual') and require('pipetable.selection').range(st, tbl) or nil
         render.paint_table(buf, tbl, W, st.scroll, { row = st.active.row, col = st.active.col }, sel, opts, hl, nil)
       else
         local skip = (st.mode == 'inactive') and { [cur] = true } or nil
@@ -154,11 +154,11 @@ function M.on_cursor(buf)
   ensure_tables(buf)
   local lnum = vim.api.nvim_win_get_cursor(win)[1] - 1
   local tbl, ti = parser.table_at(st.tables, lnum)
-  local mode = require('table-vim.mode')
+  local mode = require('pipetable.mode')
 
   if st.mode ~= 'inactive' then
     if tbl and st.active and ti == st.active.ti then
-      st.active.row = require('table-vim.navigate').row_index_for_lnum(tbl, lnum)
+      st.active.row = require('pipetable.navigate').row_index_for_lnum(tbl, lnum)
       M.refresh(buf)
     elseif tbl then
       mode.enter(buf, tbl, ti, lnum) -- moved into a different table
@@ -245,7 +245,7 @@ function M.attach(buf)
     callback = function()
       local s = state.peek(buf)
       if s and s.mode == 'table-navigate' then
-        require('table-vim.mode').set_mode(buf, 'inactive')
+        require('pipetable.mode').set_mode(buf, 'inactive')
         s.active = nil
       end
     end,
@@ -270,7 +270,7 @@ function M.attach(buf)
   if type(opts.keys.enter) == 'string' then
     vim.keymap.set('n', opts.keys.enter, function()
       M.toggle()
-    end, { buffer = buf, silent = true, desc = 'table-vim: enter/toggle table mode' })
+    end, { buffer = buf, silent = true, desc = 'pipetable: enter/toggle table mode' })
   end
 
   debounce(buf, function()
@@ -282,7 +282,7 @@ end
 function M.toggle()
   local buf = vim.api.nvim_get_current_buf()
   local st = state.get(buf)
-  local mode = require('table-vim.mode')
+  local mode = require('pipetable.mode')
   if st.mode ~= 'inactive' then
     mode.exit(buf)
     return
@@ -328,9 +328,9 @@ function M.init()
     end,
   })
 
-  vim.api.nvim_create_user_command('TableVim', function()
+  vim.api.nvim_create_user_command('Pipetable', function()
     M.toggle()
-  end, { desc = 'table-vim: toggle table mode' })
+  end, { desc = 'pipetable: toggle table mode' })
 
   for _, b in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_loaded(b) and vim.tbl_contains(opts.filetypes, vim.bo[b].filetype) then

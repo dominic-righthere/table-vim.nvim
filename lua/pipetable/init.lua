@@ -1,6 +1,6 @@
--- table-vim: interactive, fit-to-width, inline markdown tables.
-local config = require('table-vim.config')
-local manager = require('table-vim.manager')
+-- pipetable: interactive, fit-to-width, inline markdown tables.
+local config = require('pipetable.config')
+local manager = require('pipetable.manager')
 
 local M = {}
 
@@ -12,7 +12,7 @@ function M.setup(opts)
     return
   end
   manager.init()
-  require('table-vim.commands').setup()
+  require('pipetable.commands').setup()
 end
 
 ---Force a repaint of the current buffer.
@@ -28,14 +28,14 @@ end
 ---Current table mode of the current buffer ('inactive' if none).
 ---@return string
 function M.mode()
-  local st = require('table-vim.state').peek(vim.api.nvim_get_current_buf())
+  local st = require('pipetable.state').peek(vim.api.nvim_get_current_buf())
   return (st and st.mode) or 'inactive'
 end
 
 ---Statusline component, e.g. `TBL NAV 2:3`. Empty string when not in a table.
 ---@return string
 function M.status()
-  local st = require('table-vim.state').peek(vim.api.nvim_get_current_buf())
+  local st = require('pipetable.state').peek(vim.api.nvim_get_current_buf())
   if not st or st.mode == 'inactive' or not st.active then
     return ''
   end
