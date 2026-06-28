@@ -248,6 +248,47 @@ do
   config.setup_highlights()
 end
 
+-- ---------------------------------------------------------------- csv
+section('csv')
+do
+  local csv = require('pipetable.csv')
+  local rows = csv.parse('a,b,c\n1,2,3')
+  eq('parse rows', #rows, 2)
+  eq('parse cell', rows[2][3], '3')
+  local q = csv.parse('x,"a,b","he said ""hi"""')
+  eq('quoted embedded comma', q[1][2], 'a,b')
+  eq('quoted escaped quote', q[1][3], 'he said "hi"')
+  eq('quoted embedded newline', csv.parse('"l1\nl2",y')[1][1], 'l1\nl2')
+
+  eq('detect comma', csv.detect_delim('a,b,c'), ',')
+  eq('detect tab', csv.detect_delim('a\tb\tc') == '\t' and 'tab' or 'no', 'tab')
+  eq('detect semicolon', csv.detect_delim('a;b;c'), ';')
+
+  eq('to_csv plain', csv.to_csv({ { 'a', 'b' } }), 'a,b')
+  eq('to_csv quotes comma', csv.to_csv({ { 'a,b', 'c' } }), '"a,b",c')
+  eq('to_csv doubles quote', csv.to_csv({ { 'a"b' } }), '"a""b"')
+
+  local md = csv.to_markdown('Name,Age\nAda,36\nBob,8')
+  eq('md header has cols', (md[1]:match('Name') and md[1]:match('Age')) and 'y' or 'n', 'y')
+  eq('md delimiter row', md[2]:match('^|%s*%-') and 'y' or 'n', 'y')
+  eq('md line count (hdr+delim+2)', #md, 4)
+  eq('md escapes pipe', csv.to_markdown('h\na|b')[3]:match('\\|') and 'y' or 'n', 'y')
+
+  -- from_markdown round-trip
+  local t = parser.parse_buffer(mkbuf({ '| Name | Age |', '|------|-----|', '| Ada | 36 |', '| Bob | 8 |' }))[1]
+  local rt = csv.parse(csv.from_markdown(t, ','))
+  eq('roundtrip header', rt[1][1] .. ',' .. rt[1][2], 'Name,Age')
+  eq('roundtrip body', rt[3][1] .. ',' .. rt[3][2], 'Bob,8')
+
+  -- :TableFromCSV command on a range
+  local cb = mkbuf({ 'Name,Age', 'Ada,36', 'Bob,8' })
+  vim.api.nvim_set_current_buf(cb)
+  vim.cmd('1,3TableFromCSV')
+  local cl = vim.api.nvim_buf_get_lines(cb, 0, -1, false)
+  eq('FromCSV made a table', cl[1]:match('|%s*Name') and 'y' or 'n', 'y')
+  eq('FromCSV line count', #cl, 4)
+end
+
 -- ---------------------------------------------------------------- summary
 io.write(string.format('\n%d/%d passed, %d failed\n', total - fails, total, fails))
 os.exit(fails > 0 and 1 or 0)

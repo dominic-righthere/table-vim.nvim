@@ -6,6 +6,26 @@ local function buf()
   return vim.api.nvim_get_current_buf()
 end
 
+-- delimiter from a command's bang/arg: ! = TSV, arg = explicit ('tab' or a char), else autodetect
+local function delim_arg(a)
+  if a.bang then
+    return '\t'
+  end
+  if a.args and a.args ~= '' then
+    return a.args == 'tab' and '\t' or a.args
+  end
+  return nil
+end
+
+local function replace_lines(b, s0, e0, lines)
+  local was = vim.bo[b].modifiable
+  vim.bo[b].modifiable = true
+  vim.api.nvim_buf_set_lines(b, s0, e0, false, lines)
+  vim.bo[b].modifiable = was
+  require('pipetable.state').get(b).dirty = true
+  require('pipetable.manager').refresh(b)
+end
+
 -- name -> action; exposed as <Plug>(pipetable-<name>)
 local PLUGS = {
   ['insert-row-below'] = function() require('pipetable.ops').insert_row(buf(), 'below') end,
@@ -35,6 +55,10 @@ function M.setup()
   for name, fn in pairs(PLUGS) do
     vim.keymap.set('n', '<Plug>(pipetable-' .. name .. ')', fn, { desc = 'pipetable ' .. name })
   end
+  -- CSV <Plug> maps (from-csv is visual: it carries the selection range)
+  vim.keymap.set('x', '<Plug>(pipetable-from-csv)', ':TableFromCSV<CR>', { desc = 'pipetable from-csv' })
+  vim.keymap.set('n', '<Plug>(pipetable-to-csv)', '<Cmd>TableToCSV<CR>', { desc = 'pipetable to-csv' })
+  vim.keymap.set('n', '<Plug>(pipetable-paste-csv)', '<Cmd>TablePasteCSV<CR>', { desc = 'pipetable paste-csv' })
 
   local cmd = vim.api.nvim_create_user_command
   local ops = function() return require('pipetable.ops') end
@@ -56,6 +80,45 @@ function M.setup()
   cmd('TableYank', function() ops().yank_row(buf()) end, { desc = 'pipetable: yank row' })
   cmd('TablePaste', function(a) ops().paste(buf(), a.bang) end,
     { bang = true, desc = 'pipetable: paste (! = above/left)' })
+
+  -- CSV <-> markdown
+  cmd('TableFromCSV', function(a)
+    local b = buf()
+    local text = table.concat(vim.api.nvim_buf_get_lines(b, a.line1 - 1, a.line2, false), '\n')
+    local md = require('pipetable.csv').to_markdown(text, delim_arg(a))
+    if not md then
+      return vim.notify('pipetable: no CSV rows in range', vim.log.levels.WARN)
+    end
+    replace_lines(b, a.line1 - 1, a.line2, md)
+  end, { range = true, bang = true, nargs = '?', complete = function() return { 'tab', ',', ';' } end,
+    desc = 'pipetable: convert CSV/TSV range to a table (! = TSV)' })
+
+  cmd('TableToCSV', function(a)
+    local st, tbl = require('pipetable.ops')._resolve(buf())
+    if not st or not tbl then
+      return vim.notify('pipetable: no table at cursor', vim.log.levels.WARN)
+    end
+    local text = require('pipetable.csv').from_markdown(tbl, a.bang and '\t' or ',')
+    vim.fn.setreg('"', text)
+    if require('pipetable.config').get().clipboard then
+      pcall(vim.fn.setreg, '+', text)
+    end
+    vim.notify('pipetable: copied table as ' .. (a.bang and 'TSV' or 'CSV'))
+  end, { bang = true, desc = 'pipetable: copy table at cursor as CSV (! = TSV)' })
+
+  cmd('TablePasteCSV', function(a)
+    local b = buf()
+    local text = vim.fn.getreg('+')
+    if text == nil or text == '' then
+      text = vim.fn.getreg('"')
+    end
+    local md = require('pipetable.csv').to_markdown(text, a.bang and '\t' or nil)
+    if not md then
+      return vim.notify('pipetable: clipboard is not CSV/TSV', vim.log.levels.WARN)
+    end
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    replace_lines(b, row, row, md) -- insert below the cursor line
+  end, { bang = true, desc = 'pipetable: paste clipboard CSV/TSV as a table (! = TSV)' })
 end
 
 return M
