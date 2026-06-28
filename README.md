@@ -2,6 +2,8 @@
 
 Interactive, fit-to-width markdown tables for Neovim, rendered inline in your buffer.
 
+![table-vim demo](assets/demo.svg)
+
 table-vim takes the pipe tables in a markdown buffer and renders them to fit the
 window, then lets you move around them cell by cell, scroll sideways, and edit
 them like a small spreadsheet. The file on disk stays plain GitHub-flavored
