@@ -213,6 +213,15 @@ on the table under the cursor):
   :TableYank
   :TablePaste[!]                (! = above/left)
 
+                                                                   *pipetable-csv*
+CSV / TSV conversion (converts a selection or the clipboard; never edits a large
+CSV in place):
+
+  :[range]TableFromCSV[!] [delim]  range CSV/TSV -> markdown table (! = TSV,
+                                   or pass tab|,|; , else autodetect)
+  :TableToCSV[!]                   table at cursor -> clipboard as CSV (! = TSV)
+  :TablePasteCSV[!]                clipboard CSV/TSV -> markdown table at cursor
+
                                                                   *pipetable-plug*
 Every operation also has a <Plug> mapping, e.g.: >lua
 
@@ -221,7 +230,8 @@ Every operation also has a <Plug> mapping, e.g.: >lua
 Names: insert-row-below, insert-row-above, insert-col-right, insert-col-left,
 delete-row, delete-col, move-row-up, move-row-down, move-col-left,
 move-col-right, dup-row, dup-col, align-left, align-center, align-right,
-align-default, sort-asc, sort-desc, yank-row, paste-below, paste-above.
+align-default, sort-asc, sort-desc, yank-row, paste-below, paste-above,
+from-csv (visual), to-csv, paste-csv.
 
 ==============================================================================
 11. CONFLICTS & REBINDING                                  *pipetable-conflicts*

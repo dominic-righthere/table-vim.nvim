@@ -223,6 +223,22 @@ right-aligned on the active row.
   vim.keymap.set('n', '<leader>ic', '<Plug>(pipetable-insert-col-right)')
   ```
 
+## CSV / TSV conversion
+
+pipetable stays focused on markdown tables, but it can convert to and from CSV/TSV
+(it never edits a huge CSV in place — it converts a selection or the clipboard):
+
+- `:[range]TableFromCSV[!] [delim]` — turn the selected CSV/TSV lines into a markdown
+  table. `!` means TSV; pass an explicit delimiter (`tab`, `,`, `;`) or let it
+  autodetect. Visual-select the rows and run it, or `<Plug>(pipetable-from-csv)`.
+- `:TableToCSV[!]` — copy the table under the cursor to the clipboard as CSV
+  (`!` = TSV). `<Plug>(pipetable-to-csv)`.
+- `:TablePasteCSV[!]` — read CSV/TSV from the clipboard and insert it as a markdown
+  table at the cursor. `<Plug>(pipetable-paste-csv)`.
+
+Quoting follows RFC 4180 (`"`-quoted fields, `""` escapes, delimiters/newlines inside
+quotes); pipes in cells are escaped (`\|`) on the way in.
+
 ## Worried about key conflicts?
 
 Don't be. Every navigate/visual/operation key is buffer-local and only installed
